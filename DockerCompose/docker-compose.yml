@@ -1,0 +1,47 @@
+versuib: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: Root
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 60s
+      retries: 20
+      interval: 10s
+
+    networks:
+      - mynetwork
+
+  backend:
+
+    image: abhinaya1110/abhinaya:tagname
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/restaurant_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Root
+    depends_on:
+      db:
+        condition:service_healthy
+    networks:
+      - mynetwork
+
+  frontend:
+
+    image: abhinaya1110/abhinaya:myrest
+    ports:
+      - "3000-3000"
+    depends_on:
+      - backend
+    networks:
+      -mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
